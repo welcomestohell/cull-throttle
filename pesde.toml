@@ -7,9 +7,9 @@ license = "MPL 2.0"
 
 [target]
 environment = "roblox"
-lib = "dist/src/init.luau"
+lib = "dist/init.luau"
 build_files = [
-  "dist/src",
+  "dist",
 ]
 
 [indices]
