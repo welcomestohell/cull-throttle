@@ -1,14 +1,19 @@
+--[[
+Created by boatbomber - Licensed under Mozilla Public License Version 2.0
+Code is processed by Darklua and may be difficult to read. Check the original source on GitHub if needed.
+]]
+--Modified for use in Welcome To Hell
 --!strict
 --!optimize 2
 --!native
 
 local RunService = game:GetService("RunService")
 local CollectionService = game:GetService("CollectionService")
+do	
 
-if _G.__DEV__ then
-	print("Allowing CullThrottle on server during dev for unit test purposes")
-else
-	if RunService:IsServer() and not RunService:IsEdit() then
+
+
+if RunService:IsServer() and not RunService:IsEdit() then
 		error("CullThrottle is a client side effect and cannot be used on the server")
 	end
 end
@@ -19,7 +24,7 @@ local Config = require("@self/Config")
 local GoodSignal = require("@self/Utilities/GoodSignal")
 local ObjectDimensions = require("@self/Utilities/ObjectDimensions")
 local CameraCache = require("@self/Utilities/CameraCache")
-local Gizmo = if _G.__DEV__ then require("@self/Utilities/Gizmo") else nil :: any
+
 
 local vectorDot = (vector.dot :: any) :: (Vector3 | vector, Vector3 | vector) -> number
 local vectorMagnitude = (vector.magnitude :: any) :: (Vector3 | vector) -> number
@@ -127,34 +132,34 @@ type CullThrottleProto = {
 
 export type CullThrottle = setmetatable<CullThrottleProto, typeof(CullThrottle)>
 
-if _G.__DEV__ then
-	function CullThrottle._drawBox(
-		self: CullThrottle,
-		color: Color3,
-		transparency: number,
-		x0: number,
-		y0: number,
-		z0: number,
-		x1: number,
-		y1: number,
-		z1: number
-	)
-		if not _G.__VISUALIZE__ then
-			return
-		end
-		local voxelSize = self._config.voxelSize
-		local x0World, y0World, z0World = x0 * voxelSize, y0 * voxelSize, z0 * voxelSize
-		local x1World, y1World, z1World = x1 * voxelSize, y1 * voxelSize, z1 * voxelSize
 
-		local cf = CFrame.new((x0World + x1World) / 2, (y0World + y1World) / 2, (z0World + z1World) / 2)
-		local size = Vector3.new(math.abs(x0World - x1World), math.abs(y0World - y1World), math.abs(z0World - z1World))
-			- (Vector3.one * 2)
 
-		Gizmo.setColor3(color)
-		Gizmo.setTransparency(transparency)
-		Gizmo.drawWireBox(cf, size)
-	end
-end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function CullThrottle._resizeTables(self: CullThrottle)
 	-- We've got a couple arrays that we clear without shrinking their size
@@ -290,8 +295,8 @@ function CullThrottle._updateDesiredVoxelKeys(
 	object: Instance,
 	objectData: types.ObjectData
 ): { [types.VoxelKey]: boolean }
-	debug.profilebegin("_updateDesiredVoxelKeys")
-	local voxelSize = self._config.voxelSize
+	
+local voxelSize = self._config.voxelSize
 	local multiVoxelRadiusThreshold = self._config.multiVoxelRadiusThreshold
 
 	-- Update desiredVoxelKeys table in place rather than reallocating
@@ -306,19 +311,19 @@ function CullThrottle._updateDesiredVoxelKeys(
 	desiredVoxelKeys[desiredVoxelKey] = true
 
 	if objectData.radius > multiVoxelRadiusThreshold then
-		-- Object is large enough that it may span more than its center voxel.
-		--
-		-- The bounding box is oriented, so we can't just fill its world-space
-		-- AABB: for a rotated object that AABB bulges past the box and its corner
-		-- voxels would be empty. Instead the AABB only bounds which voxels are
-		-- worth checking, and we keep a voxel only if it truly overlaps the box.
-		--
-		-- Overlap is a separating-axis test against the box's own 3 face axes.
-		-- (The 3 world axes are already covered by the AABB candidate range, so
-		-- no candidate can be separated along them.) We skip the 9 edge-edge
-		-- cross-product axes; omitting them can only ever over-include, never
-		-- wrongly cull, and leaves at most a thin sliver of corner voxels.
-		local _, _, _, r00, r01, r02, r10, r11, r12, r20, r21, r22 = cframe:GetComponents()
+local
+
+
+
+
+
+
+
+
+
+
+
+_, _, _, r00, r01, r02, r10, r11, r12, r20, r21, r22 =cframe:GetComponents()
 		local hx, hy, hz = halfBoundingBox.X, halfBoundingBox.Y, halfBoundingBox.Z
 		local halfVoxel = voxelSize / 2
 
@@ -416,9 +421,9 @@ function CullThrottle._updateDesiredVoxelKeys(
 
 		self._updateObjectVoxelsQueue:addToIncomingBatch(object, priority)
 	end
+	
 
-	debug.profileend()
-	return desiredVoxelKeys
+return desiredVoxelKeys
 end
 
 function CullThrottle._insertToVoxel(self: CullThrottle, voxelKey: types.VoxelKey, object: Instance)
@@ -463,9 +468,9 @@ function CullThrottle._removeFromVoxel(self: CullThrottle, voxelKey: types.Voxel
 end
 
 function CullThrottle._updateObjectVoxels(self: CullThrottle, timeBudget: number, now: number)
-	debug.profilebegin("updateObjectVoxels")
 
-	self._updateObjectVoxelsQueue:enqueueIncomingBatch()
+	
+self._updateObjectVoxelsQueue:enqueueIncomingBatch()
 	self._updateObjectVoxelsQueue:clearIncomingBatch()
 
 	while (not self._updateObjectVoxelsQueue:isEmpty()) and (os.clock() - now < timeBudget) do
@@ -488,15 +493,15 @@ function CullThrottle._updateObjectVoxels(self: CullThrottle, timeBudget: number
 		end
 	end
 
-	debug.profileend()
+
 end
 
 function CullThrottle._pollPhysicsObjects(self: CullThrottle, timeBudget: number, now: number)
-	debug.profilebegin("pollPhysicsObjects")
-	local numPhysicsObjects = #self._physicsObjects
+	
+local numPhysicsObjects = #self._physicsObjects
 	if numPhysicsObjects == 0 then
-		debug.profileend()
-		return
+		
+return
 	end
 
 	local startIndex = math.clamp(self._physicsObjectIterIndex, 1, numPhysicsObjects)
@@ -531,7 +536,7 @@ function CullThrottle._pollPhysicsObjects(self: CullThrottle, timeBudget: number
 			break
 		end
 	end
-	debug.profileend()
+
 end
 
 function CullThrottle._isBoxInFrustum(
@@ -545,8 +550,8 @@ function CullThrottle._isBoxInFrustum(
 	y1: number,
 	z1: number
 ): (boolean, boolean) -- Returns (intersects, completelyInside)
-	debug.profilebegin("isBoxInFrustum")
-	local voxelSize = self._config.voxelSize
+	
+local voxelSize = self._config.voxelSize
 	-- Ensure x0 <= x1, y0 <= y1, z0 <= z1
 	local x0W, x1W = x0 * voxelSize, x1 * voxelSize
 	local y0W, y1W = y0 * voxelSize, y1 * voxelSize
@@ -574,9 +579,9 @@ function CullThrottle._isBoxInFrustum(
 		local dist = vectorDot(center - planePos, planeNormal)
 
 		if dist > sphereRadius + EPSILON then
-			-- The circumscribing sphere is fully outside this plane, so the box is too
-			debug.profileend()
-			return false, false
+			
+
+return false, false
 		elseif dist > -sphereRadius then
 			-- The box straddles this plane, so fall back to the exact projection
 			-- interval radius of the box onto the plane normal
@@ -586,8 +591,8 @@ function CullThrottle._isBoxInFrustum(
 
 			-- If the distance is greater than the radius, the box is outside the frustum
 			if dist > radius + EPSILON then
-				debug.profileend()
-				return false, false
+				
+return false, false
 			end
 
 			-- If the distance plus the radius is positive, the box is not completely inside this plane
@@ -596,15 +601,15 @@ function CullThrottle._isBoxInFrustum(
 			end
 		end
 	end
+	
 
-	-- If we've made it here, the box is either inside or intersecting the frustum
-	debug.profileend()
-	return true, completelyInside
+
+return true, completelyInside
 end
 
 function CullThrottle._ingestVoxel(self: CullThrottle, now: number, voxel: types.Voxel)
-	debug.profilebegin("ingestVoxel")
-	local cameraCFrame = CameraCache.CFrame
+	
+local cameraCFrame = CameraCache.CFrame
 	local cameraPos = CameraCache.Position
 	local cameraLookVector = cameraCFrame.LookVector
 	local cameraRightVector = cameraCFrame.RightVector
@@ -702,7 +707,7 @@ function CullThrottle._ingestVoxel(self: CullThrottle, now: number, voxel: types
 
 	self._pendingEnteredViewSize = pendingEnteredViewSize
 
-	debug.profileend()
+
 end
 
 function CullThrottle._fastApproxIngestRemainingVoxels(self: CullThrottle, now: number, startIndex: number)
@@ -807,10 +812,10 @@ function CullThrottle._searchVolume(
 		-- If this voxel was visible a moment ago, assume it still is
 		if now - (lastVoxelVisibility[voxelKey] or 0) < JITTERED_LAST_VISIBILITY_GRACE_PERIOD then
 			self:_addVoxelKeyToVisible(voxelKey)
-			if _G.__DEV__ then
-				self:_drawBox(Color3.new(0, 1, 0), 0, x0, y0, z0, x1, y1, z1)
-			end
-			return
+			
+
+
+return
 		end
 
 		-- Alright, we actually do need to check if this voxel is visible
@@ -825,15 +830,15 @@ function CullThrottle._searchVolume(
 		lastVoxelVisibility[voxelKey] = now
 		self:_addVoxelKeyToVisible(voxelKey)
 
-		if _G.__DEV__ then
-			self:_drawBox(Color3.new(0, 1, 0), 0, x0, y0, z0, x1, y1, z1)
-		end
+		
 
-		return
+
+
+return
 	end
+	
 
-	debug.profilebegin("checkBoxVisibilityCache")
-	local allVoxelsVisible = true
+local allVoxelsVisible = true
 	local containsVoxels = false
 	for x = x0, x1 - 1 do
 		for y = y0, y1 - 1 do
@@ -857,17 +862,17 @@ function CullThrottle._searchVolume(
 			break
 		end
 	end
-	debug.profileend()
 
 	-- Don't bother checking further if this box doesn't contain any voxels
-	if not containsVoxels then
+	
+if not containsVoxels then
 		return
 	end
 
 	-- If all voxels in this box were visible a moment ago, just assume they still are
 	if allVoxelsVisible then
-		debug.profilebegin("allVoxelsVisible")
-		for x = x0, x1 - 1 do
+		
+for x = x0, x1 - 1 do
 			for y = y0, y1 - 1 do
 				for z = z0, z1 - 1 do
 					local voxelKey = Vector3.new(x, y, z)
@@ -879,11 +884,11 @@ function CullThrottle._searchVolume(
 				end
 			end
 		end
-		debug.profileend()
-		if _G.__DEV__ then
-			self:_drawBox(Color3.new(0, 1, 0), 0, x0, y0, z0, x1, y1, z1)
-		end
-		return
+		
+
+
+
+return
 	end
 
 	-- Alright, we actually do need to check if this box is visible
@@ -891,9 +896,9 @@ function CullThrottle._searchVolume(
 
 	-- If the box is outside the frustum, stop checking now
 	if not isInside then
-		-- All voxels within this box are not visible and should clear their cache
-		debug.profilebegin("clearBoxVisibilityCache")
-		for x = x0, x1 - 1 do
+		
+
+for x = x0, x1 - 1 do
 			for y = y0, y1 - 1 do
 				for z = z0, z1 - 1 do
 					local voxelKey = Vector3.new(x, y, z)
@@ -903,15 +908,15 @@ function CullThrottle._searchVolume(
 				end
 			end
 		end
-		debug.profileend()
-		return
+		
+return
 	end
 
 	-- If the box is entirely inside, then we know all voxels contained inside are in the frustum
 	-- and we can process them now and not split further
 	if isCompletelyInside then
-		debug.profilebegin("isCompletelyInside")
-		for x = x0, x1 - 1 do
+		
+for x = x0, x1 - 1 do
 			for y = y0, y1 - 1 do
 				for z = z0, z1 - 1 do
 					local voxelKey = Vector3.new(x, y, z)
@@ -924,11 +929,11 @@ function CullThrottle._searchVolume(
 				end
 			end
 		end
-		debug.profileend()
-		if _G.__DEV__ then
-			self:_drawBox(Color3.new(0, 1, 0), 0, x0, y0, z0, x1, y1, z1)
-		end
-		return
+		
+
+
+
+return
 	end
 
 	-- We are partially inside, so we need to split this box up further
@@ -1019,14 +1024,14 @@ function CullThrottle._clearVisibleObjects(self: CullThrottle)
 end
 
 function CullThrottle._fillVisibleObjectsQueue(self: CullThrottle)
-	debug.profilebegin("fillVisibleObjectsQueue")
-	self._visibleObjectsQueue:enqueueIncomingBatch()
-	debug.profileend()
+	
+self._visibleObjectsQueue:enqueueIncomingBatch()
+
 end
 
 function CullThrottle._signalVisibilityChanges(self: CullThrottle, now: number)
-	debug.profilebegin("signalVisibilityChanges")
-	local objectVisibilityTimestamps = self._objectVisibilityTimestamps
+	
+local objectVisibilityTimestamps = self._objectVisibilityTimestamps
 	local pendingExitedView = self._pendingExitedView
 	local pendingExitedViewSize = self._pendingExitedViewSize
 
@@ -1041,19 +1046,19 @@ function CullThrottle._signalVisibilityChanges(self: CullThrottle, now: number)
 
 	self._pendingExitedViewSize = pendingExitedViewSize
 
-	debug.profileend()
+
 end
 
 function CullThrottle._flushVisibilitySignals(self: CullThrottle)
-	-- Fire the visibility signals buffered during this frame's search/ingest.
-	-- By the time we get here all of CullThrottle's own iteration over _voxels,
-	-- _objects, and _objectVisibilityTimestamps is finished, so a handler is now
-	-- free to mutate the tracked set (AddObject/RemoveObject) without corrupting
-	-- an in-progress loop. We null out each slot as we go so a removed/destroyed
-	-- instance isn't pinned in the buffer until the next frame overwrites it.
-	debug.profilebegin("flushVisibilitySignals")
 
-	local enteredView = self.ObjectEnteredView
+	
+
+
+
+
+
+
+local enteredView = self.ObjectEnteredView
 	local pendingEnteredView = self._pendingEnteredView
 	local enteredCount = self._pendingEnteredViewSize
 	self._pendingEnteredViewSize = 0
@@ -1073,14 +1078,14 @@ function CullThrottle._flushVisibilitySignals(self: CullThrottle)
 		exitedView:Fire(object)
 	end
 
-	debug.profileend()
+
 end
 
 function CullThrottle._findVisibleObjects(self: CullThrottle, now: number)
-	debug.profilebegin("findVisibleObjects")
 
 	-- Clear any objects left over from last frame
-	self:_clearVisibleObjects()
+	
+self:_clearVisibleObjects()
 
 	self._perfMetrics._skippedIngest[SKIPPED_FRAMES_LOOKBACK] = nil
 	self._perfMetrics._skippedSearch[SKIPPED_FRAMES_LOOKBACK] = nil
@@ -1134,8 +1139,8 @@ function CullThrottle._findVisibleObjects(self: CullThrottle, now: number)
 			self._volumeRotationCounter = 0
 		else
 			local chosenBase = (firstVolumeIndex - 1) * 6
-			local topBase = 7 * 6
-			for k = 1, 6 do
+			local topBase = 42			
+for k = 1, 6 do
 				volumesToCheck[chosenBase + k], volumesToCheck[topBase + k] =
 					volumesToCheck[topBase + k], volumesToCheck[chosenBase + k]
 			end
@@ -1144,9 +1149,9 @@ function CullThrottle._findVisibleObjects(self: CullThrottle, now: number)
 	end
 
 	local voxels = self._voxels
+	
 
-	debug.profilebegin("searchVolumes")
-	while self._volumesToCheckSize > 0 do
+while self._volumesToCheckSize > 0 do
 		-- TODO: Workers pop volumes from the list and check them in parallel
 
 		-- Pop the top volume (6 numbers). We read its bounds into locals before
@@ -1171,16 +1176,16 @@ function CullThrottle._findVisibleObjects(self: CullThrottle, now: number)
 		end
 	end
 	self._perfMetrics._searchDuration = os.clock() - now
-	debug.profileend()
+	
 
-	-- The search appended visible voxels in subdivision order; order them
-	-- closest-first so the ingest below spends its budget on the nearest voxels.
-	debug.profilebegin("sortVisibleVoxels")
-	self:_sortVisibleVoxelKeys()
-	debug.profileend()
 
-	debug.profilebegin("ingestVoxels")
-	local visibleVoxelKeys = self._visibleVoxelKeys
+
+
+self:_sortVisibleVoxelKeys()
+	
+
+
+local visibleVoxelKeys = self._visibleVoxelKeys
 	local visibleVoxelCount = self._visibleVoxelCount
 	local startIngestClock = os.clock()
 	for voxelIndex = 1, visibleVoxelCount do
@@ -1200,9 +1205,9 @@ function CullThrottle._findVisibleObjects(self: CullThrottle, now: number)
 	end
 
 	self._perfMetrics._ingestDuration = os.clock() - startIngestClock
-	debug.profileend()
 
-	debug.profileend()
+
+
 end
 
 function CullThrottle._adjustDynamicRenderDistance(self: CullThrottle)
@@ -1258,11 +1263,11 @@ function CullThrottle._processObjectVisibility(self: CullThrottle, start: number
 		return
 	end
 
-	debug.profilebegin("CullThrottle.processObjectVisibility")
-
 	-- Keep our voxels up to date, spending up to PHYSICS_POLL_TIME_BUDGET +
 	-- VOXEL_UPDATE_TIME_BUDGET (~0.1 ms total) before searching for visibility.
-	self:_pollPhysicsObjects(PHYSICS_POLL_TIME_BUDGET, start)
+	
+
+self:_pollPhysicsObjects(PHYSICS_POLL_TIME_BUDGET, start)
 	self:_updateObjectVoxels(VOXEL_UPDATE_TIME_BUDGET, os.clock())
 
 	-- Find the objects that are visible this frame
@@ -1283,7 +1288,7 @@ function CullThrottle._processObjectVisibility(self: CullThrottle, start: number
 	-- visibility signals we buffered during the search/ingest pass.
 	self:_flushVisibilitySignals()
 
-	debug.profileend()
+
 end
 
 --[[
@@ -1438,7 +1443,7 @@ function CullThrottle.AddObject(self: CullThrottle, object: Instance)
 		desiredVoxelKeys = {},
 		lastCheckClock = 0,
 		lastUpdateClock = 0,
-		jitterOffset = math.random(-1000, 1000) / 500000,
+		jitterOffset = math.random(-1E3, 1000) / 500000,
 		changeConnections = {},
 		cframeSource = cframeSource,
 		cframeType = cframeType,
@@ -1628,10 +1633,10 @@ function CullThrottle.GetVisibleObjects(self: CullThrottle): { Instance }
 end
 
 function CullThrottle.IterateObjectsToUpdate(self: CullThrottle): () -> (Instance?, number?, number?, CFrame?)
-	debug.profilebegin("CullThrottle.iterObjects")
 
 	-- Process visibility if we haven't already processed this frame yet
-	self:_processObjectVisibility(os.clock())
+	
+self:_processObjectVisibility(os.clock())
 
 	-- We need to put the visibleObjects into our priority queue,
 	-- which we then empty as we iterate through the objects
@@ -1648,9 +1653,9 @@ function CullThrottle.IterateObjectsToUpdate(self: CullThrottle): () -> (Instanc
 	local sumOfObjectDeltaTimes = 0
 
 	local function finish()
-		debug.profileend()
 
-		if updatedObjects > 0 then
+		
+if updatedObjects > 0 then
 			self._perfMetrics._averageObjectDeltaTime = sumOfObjectDeltaTimes / updatedObjects
 		end
 

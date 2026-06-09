@@ -3,7 +3,8 @@
 /*.rbxlx
 /*.rbxm
 /*.rbxmx
-dist/
+# Yeah we lowk need this for welcome to hell
+# dist/
 
 # Wally managed packages
 Packages/

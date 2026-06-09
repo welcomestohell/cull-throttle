@@ -1,0 +1,28 @@
+name = "welcomestohell/cull_throttle"
+version = "0.1.0"
+description = "Manage effects for tens of thousands of objects, performantly."
+authors = ["boatbomber (https://boatbomber.com)", "godmothersfire"]
+repository = "https://github.com/welcomestohell/cull-throttle.git"
+license = "MPL 2.0"
+
+[target]
+environment = "roblox"
+lib = "dist/src"
+build_files = [
+  "dist/src/**/*.luau",
+]
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[scripts]
+roblox_sync_config_generator = ".pesde/scripts/roblox_sync_config_generator.luau"
+sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
+
+[dev_dependencies]
+scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
+rojo = { name = "pesde/rojo", version = "^7.5.1", target = "lune" }
+
+[engines]
+pesde = "^0.7.0"
+lune = "^0.10.2"
